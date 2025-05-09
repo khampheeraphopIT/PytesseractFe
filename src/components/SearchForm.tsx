@@ -1,49 +1,49 @@
-import { useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { Button, CircularProgress, TextField, Typography } from '@mui/material'
-import { SearchOutlined } from '@mui/icons-material'
-import type { ISearchForm } from '../type/SearchForm'
-import type { SearchRequest } from '../type/SearchRequest'
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Button, CircularProgress, TextField, Typography } from '@mui/material';
+import { SearchOutlined } from '@mui/icons-material';
+import type { ISearchForm } from '../type/SearchForm';
+import type { SearchRequest } from '../type/SearchRequest';
 
 interface SearchFormProps {
-  setSearchResults: React.Dispatch<React.SetStateAction<ISearchForm[]>>
+  setSearchForms: React.Dispatch<React.SetStateAction<ISearchForm[]>>;
 }
 
-const SearchForm: React.FC<SearchFormProps> = ({ setSearchResults }) => {
+const SearchForm: React.FC<SearchFormProps> = ({ setSearchForms }) => {
   const { control, handleSubmit, formState: { errors } } = useForm<SearchRequest>({
     defaultValues: {
       query: '',
       min_score: 0.1,
     },
-  })
+  });
 
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [message, setMessage] = useState<string>('')
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>('');
 
   const onSubmit = async (data: SearchRequest) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       const response = await fetch('http://localhost:8000/api/v1/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
-      })
-      const results = await response.json()
+      });
+      const results = await response.json();
       if (response.ok) {
-        setSearchResults(results)
-        setMessage(results.length === 0 ? 'No results found' : '')
+        setSearchForms(results);
+        setMessage(results.length === 0 ? 'No results found' : '');
       } else {
-        setMessage(`Error: ${results.detail || 'Failed to search'}`)
-        setSearchResults([])
+        setMessage(`Error: ${results.detail || 'Failed to search'}`);
+        setSearchForms([]);
       }
     } catch (error) {
-      setMessage('Error searching documents')
-      setSearchResults([])
-      console.error(error)
+      setMessage('Error searching documents');
+      setSearchForms([]);
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -55,31 +55,11 @@ const SearchForm: React.FC<SearchFormProps> = ({ setSearchResults }) => {
           <TextField
             {...field}
             label="Search Query"
-            placeholder="Enter search"
+            placeholder="Enter multiple terms (e.g., เทคนิค การใช้งาน การทำงาน)"
             fullWidth
             error={!!errors.query}
             helperText={errors.query?.message}
             margin="normal"
-          />
-        )}
-      />
-      <Controller
-        name="min_score"
-        control={control}
-        rules={{
-          min: { value: 0, message: 'Minimum score must be at least 0' },
-        }}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            type="number"
-            label="Minimum Score"
-            inputProps={{ step: '0.01', min: 0 }}
-            fullWidth
-            error={!!errors.min_score}
-            helperText={errors.min_score?.message}
-            margin="normal"
-            onChange={(e) => field.onChange(Number(e.target.value))}
           />
         )}
       />
@@ -103,7 +83,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ setSearchResults }) => {
         </Typography>
       )}
     </form>
-  )
-}
+  );
+};
 
-export default SearchForm
+export default SearchForm;

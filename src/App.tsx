@@ -5,7 +5,7 @@ import UploadForm from "./components/UploadForm";
 import type { ISearchForm } from "./type/SearchForm";
 
 const App: React.FC = () => {
-  const [searchResults, setSearchResults] = useState<ISearchForm[]>([]);
+  const [SearchForms, setSearchForms] = useState<ISearchForm[]>([]);
   const [uploadMessage, setUploadMessage] = useState<string>("");
  
   return (
@@ -34,15 +34,15 @@ const App: React.FC = () => {
         <Typography variant="h6" gutterBottom>
           Search Documents
         </Typography>
-        <SearchForm setSearchResults={setSearchResults} />
+        <SearchForm setSearchForms={setSearchForms} />
       </Box>
 
-      {searchResults.length > 0 && (
+      {SearchForms.length > 0 && (
         <Box>
           <Typography variant="h6" gutterBottom>
             Search Results
           </Typography>
-          {searchResults.map((result) => (
+          {SearchForms.map((result) => (
             <Box
               key={result.id}
               sx={{
