@@ -1,41 +1,42 @@
-import { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { Button, CircularProgress, TextField, Typography } from '@mui/material';
-import { SearchOutlined } from '@mui/icons-material';
-import type { ISearchForm } from '../type/SearchForm';
-import type { SearchRequest } from '../type/SearchRequest';
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Button, CircularProgress, TextField, Typography } from "@mui/material";
+import { SearchOutlined } from "@mui/icons-material";
+import type { ISearchForm } from "../type/SearchForm";
+import type { SearchRequest } from "../type/SearchRequest";
+import axios from "axios";
 
 interface SearchFormProps {
   setSearchForms: React.Dispatch<React.SetStateAction<ISearchForm[]>>;
 }
 
 const SearchForm: React.FC<SearchFormProps> = ({ setSearchForms }) => {
-  const { control, handleSubmit, formState: { errors } } = useForm<SearchRequest>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SearchRequest>({
     defaultValues: {
-      query: '',
+      query: "",
       min_score: 0.1,
     },
   });
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>('');
+  const [message, setMessage] = useState<string>("");
 
   const onSubmit = async (data: SearchRequest) => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/v1/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const results = await response.json();
-      if (response.ok) {
-        setSearchForms(results);
-        setMessage(results.length === 0 ? 'No results found' : '');
-      } else {
-        setMessage(`Error: ${results.detail || 'Failed to search'}`);
-        setSearchForms([]);
-      }
+      const response = await axios.post("http://localhost:8000/api/v1/search", data,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      const results = response.data;
+
+      setSearchForms(results);
+      setMessage(results.length === 0 ? "No results found" : "");
     } catch (error) {
       setMessage('Error searching documents');
       setSearchForms([]);
@@ -50,7 +51,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ setSearchForms }) => {
       <Controller
         name="query"
         control={control}
-        rules={{ required: 'Search query is required' }}
+        rules={{ required: "Search query is required" }}
         render={({ field }) => (
           <TextField
             {...field}
@@ -71,12 +72,12 @@ const SearchForm: React.FC<SearchFormProps> = ({ setSearchForms }) => {
         disabled={isLoading}
         sx={{ mt: 2 }}
       >
-        {isLoading ? <CircularProgress size={24} /> : 'Search'}
+        {isLoading ? <CircularProgress size={24} /> : "Search"}
       </Button>
       {message && (
         <Typography
           variant="body2"
-          color={message.includes('Error') ? 'error' : 'text.secondary'}
+          color={message.includes("Error") ? "error" : "text.secondary"}
           sx={{ mt: 1 }}
         >
           {message}

@@ -1,53 +1,49 @@
-import { CloudUploadOutlined } from '@mui/icons-material'
-import { Box, Button, CircularProgress } from '@mui/material'
-import { useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import type { IUploadForm } from '../type/UploadForm'
+import { CloudUploadOutlined } from "@mui/icons-material";
+import { Box, Button, CircularProgress } from "@mui/material";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import axios from "axios";
 
 interface UploadFormProps {
-  setUploadMessage: React.Dispatch<React.SetStateAction<string>>
+  setUploadMessage: React.Dispatch<React.SetStateAction<string>>;
 }
 
 interface UploadFormData {
-  file: File
+  file: File;
 }
 
 const UploadForm: React.FC<UploadFormProps> = ({ setUploadMessage }) => {
-  const { control, handleSubmit, reset } = useForm<UploadFormData>()
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { control, handleSubmit, reset } = useForm<UploadFormData>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const onSubmit = async (data: UploadFormData) => {
-    const file = data?.file
+    const file = data?.file;
     if (!file) {
-      setUploadMessage('Please select a PDF file')
-      return
+      setUploadMessage("Please select a PDF file");
+      return;
     }
 
-    setIsLoading(true)
-    const formData = new FormData()
-    formData.append('file', file)
+    setIsLoading(true);
+    const formData = new FormData();
+    formData.append("file", file);
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/upload', {
-        method: 'POST',
-        body: formData,
-      })
-      const result: IUploadForm = await response.json()
-      if (response.ok) {
-        const message = `File uploaded successfully: ${result.title}`
-        setUploadMessage(message)
-        reset()
-      } else {
-        const errorMessage = `Error: ${result.message || 'Failed to upload file'}`
-        setUploadMessage(errorMessage)
-      }
+      const response = await axios.post("http://localhost:8000/api/v1/upload", formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      const result = response.data;
+      const message = `File uploaded successfully: ${result.title}`;
+      setUploadMessage(message);
+      reset();
     } catch (error) {
-      setUploadMessage('Error uploading file')
-      console.error('Fetch error:', error)
+      setUploadMessage("Error uploading file");
+      console.error("Fetch error:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -56,15 +52,15 @@ const UploadForm: React.FC<UploadFormProps> = ({ setUploadMessage }) => {
           name="file"
           control={control}
           defaultValue={undefined}
-          rules={{ required: 'Please select a PDF file' }}
+          rules={{ required: "Please select a PDF file" }}
           render={({ field }) => (
             <input
               type="file"
               accept="application/pdf"
               onChange={(e) => {
-                const file = e.target.files?.[0]
+                const file = e.target.files?.[0];
                 if (file) {
-                  field.onChange(file)
+                  field.onChange(file);
                 }
               }}
             />
@@ -77,11 +73,11 @@ const UploadForm: React.FC<UploadFormProps> = ({ setUploadMessage }) => {
           startIcon={<CloudUploadOutlined />}
           disabled={isLoading}
         >
-          {isLoading ? <CircularProgress size={24} /> : 'Upload PDF'}
+          {isLoading ? <CircularProgress size={24} /> : "Upload PDF"}
         </Button>
       </Box>
     </form>
-  )
-}
+  );
+};
 
-export default UploadForm
+export default UploadForm;
