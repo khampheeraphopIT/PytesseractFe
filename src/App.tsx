@@ -3,6 +3,7 @@ import { Box, Container, Typography } from "@mui/material";
 import SearchForm from "./components/SearchForm";
 import UploadForm from "./components/UploadForm";
 import type { ISearchForm } from "./type/SearchForm";
+import Highlighter from "react-highlight-words";
 
 const App: React.FC = () => {
   const [SearchForms, setSearchForms] = useState<ISearchForm[]>([]);
@@ -66,10 +67,14 @@ const App: React.FC = () => {
                     {field}:
                   </Typography>
                   {highlights.map((hl, index) => (
-                    <Typography
+                    <Highlighter
                       key={index}
-                      variant="body2"
-                      dangerouslySetInnerHTML={{ __html: hl }}
+                      searchWords={result.matched_terms}
+                      autoEscape={true}
+                      textToHighlight={(hl.replace(/<em>(.*?)<\/em>/g, "$1"))}
+                      highlightStyle={{
+                        backgroundColor: "#ffeb3b",
+                      }}
                     />
                   ))}
                 </Box>
