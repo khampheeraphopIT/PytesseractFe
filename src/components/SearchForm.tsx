@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button, CircularProgress, TextField, Typography } from "@mui/material";
 import { SearchOutlined } from "@mui/icons-material";
-import type { ISearchForm } from "../type/SearchForm";
-import type { SearchRequest } from "../type/SearchRequest";
+import type { ISearchForm, SearchRequest } from "../type/SearchForm";
 import axios from "axios";
 
 interface SearchFormProps {

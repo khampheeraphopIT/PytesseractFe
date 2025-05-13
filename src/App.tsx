@@ -12,7 +12,7 @@ const App: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom align="center">
-        ScanImage PDF Search
+        ScanImage PDF
       </Typography>
 
       <Box sx={{ mb: 4 }}>
