@@ -6,9 +6,9 @@ import type { ISearchForm } from "./type/SearchForm";
 import Highlighter from "react-highlight-words";
 
 const App: React.FC = () => {
-  const [SearchForms, setSearchForms] = useState<ISearchForm[]>([]);
+  const [searchForms, setSearchForms] = useState<ISearchForm[]>([]);
   const [uploadMessage, setUploadMessage] = useState<string>("");
- 
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom align="center">
@@ -38,12 +38,12 @@ const App: React.FC = () => {
         <SearchForm setSearchForms={setSearchForms} />
       </Box>
 
-      {SearchForms.length > 0 && (
+      {searchForms.length > 0 && (
         <Box>
           <Typography variant="h6" gutterBottom>
             Search Results
           </Typography>
-          {SearchForms.map((result) => (
+          {searchForms.map((result) => (
             <Box
               key={result.id}
               sx={{
@@ -59,26 +59,69 @@ const App: React.FC = () => {
                 Score: {result.score.toFixed(4)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Matched Terms: {result.matched_terms.join(",") || "None"}
+                Exact Matches: {(result.matched_terms.exact || []).join(", ") || "None"}
               </Typography>
-              {Object.entries(result.highlight).map(([field, highlights]) => (
-                <Box key={field} sx={{ mt: 1 }}>
-                  <Typography variant="body2" fontWeight="medium">
-                    {field}:
-                  </Typography>
-                  {highlights.map((hl, index) => (
-                    <Highlighter
-                      key={index}
-                      searchWords={result.matched_terms}
-                      autoEscape={true}
-                      textToHighlight={(hl.replace(/<em>(.*?)<\/em>/g, "$1"))}
-                      highlightStyle={{
-                        backgroundColor: "#ffeb3b",
-                      }}
-                    />
-                  ))}
-                </Box>
-              ))}
+              <Typography variant="body2" color="text.secondary">
+                Fuzzy Matches: {(result.matched_terms.fuzzy || []).join(", ") || "None"}
+              </Typography>
+              {/* แสดง page_keywords */}
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="body2" fontWeight="medium">
+                  Keywords by Page:
+                </Typography>
+                {result.page_keywords.length > 0 ? (
+                  result.page_keywords.map((pk) => (
+                    <Typography key={pk.page_number} variant="body2">
+                      Page {pk.page_number}: {pk.keywords.join(", ")}
+                    </Typography>
+                  ))
+                ) : (
+                  <Typography variant="body2">No keywords found</Typography>
+                )}
+              </Box>
+              {/* แสดง matched_pages */}
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="body2" fontWeight="medium">
+                  Matched Pages:
+                </Typography>
+                {result.matched_pages.length > 0 ? (
+                  result.matched_pages.map((mp) => (
+                    <Box key={mp.page_number} sx={{ ml: 2 }}>
+                      <Typography variant="body2">
+                        Page {mp.page_number}:
+                      </Typography>
+                      {Object.entries(mp.highlight).map(([field, highlights]) => (
+                        <Box key={field}>
+                          {highlights.map((hl, index) => (
+                            <Highlighter
+                              key={index}
+                              searchWords={[...(result.matched_terms.exact || []), ...(result.matched_terms.fuzzy || [])]}
+                              autoEscape={true}
+                              textToHighlight={hl.replace(/<em>(.*?)<\/em>/g, "$1")}
+                              highlightTag={({ children }) => {
+                                const isExact = (result.matched_terms.exact || []).some(
+                                  (term) => term.toLowerCase() === children.toLowerCase()
+                                );
+                                return (
+                                  <span
+                                    style={{
+                                      backgroundColor: isExact ? "#ffeb3b" : "#ff9800",
+                                    }}
+                                  >
+                                    {children}
+                                  </span>
+                                );
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      ))}
+                    </Box>
+                  ))
+                ) : (
+                  <Typography variant="body2">No matched pages found</Typography>
+                )}
+              </Box>
             </Box>
           ))}
         </Box>
