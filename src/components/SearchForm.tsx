@@ -27,17 +27,19 @@ const SearchForm: React.FC<SearchFormProps> = ({ setSearchForms }) => {
   const onSubmit = async (data: SearchRequest) => {
     setIsLoading(true);
     try {
-      const response = await axios.post("http://localhost:8000/api/v1/search", data,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
+      const response = await axios.post(
+        "http://localhost:8000/api/v1/search",
+        data,
       );
-      const results = response.data;
+      const results = response.data.map((result: ISearchForm) => ({
+        ...result,
+        query: data.query,
+      }));
 
       setSearchForms(results);
       setMessage(results.length === 0 ? "No results found" : "");
     } catch (error) {
-      setMessage('Error searching documents');
+      setMessage("Error searching documents");
       setSearchForms([]);
       console.error(error);
     } finally {
