@@ -104,8 +104,9 @@ const Index: React.FC = () => {
                                       ...(result.matched_terms.fuzzy || []),
                                     ]}
                                     autoEscape={true}
-                                    textToHighlight={(
-                                      hl.replace(/<em>(.*?)<\/em>/g, "$1")
+                                    textToHighlight={hl.replace(
+                                      /<em>(.*?)<\/em>/g,
+                                      "$1"
                                     )}
                                     highlightTag={({ children }) => {
                                       const isExact = (
