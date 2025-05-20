@@ -24,7 +24,7 @@ const PDFDetail: React.FC<PDFDetailProps> = ({ document, initialPage }) => {
         ค้นหาคำว่า: {document.query}
       </Typography>
 
-      <Box display="flex" justifyContent='space-between'>
+      <Box display="flex" justifyContent="space-between">
         <Box
           sx={{
             width: "200px",
@@ -50,6 +50,7 @@ const PDFDetail: React.FC<PDFDetailProps> = ({ document, initialPage }) => {
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6">Page {selectedPage}</Typography>
             {document.matched_pages
+              .sort((a, b) => a.page_number - b.page_number)
               .filter((page) => page.page_number === selectedPage)
               .map((page) => (
                 <Box key={page.page_number}>

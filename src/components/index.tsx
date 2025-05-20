@@ -88,74 +88,76 @@ const Index: React.FC = () => {
                       Matched Pages:
                     </Typography>
                     {result.matched_pages.length > 0 ? (
-                      result.matched_pages.map((mp) => (
-                        <Box key={mp.page_number} sx={{ ml: 2, mb: 1 }}>
-                          <Typography variant="body2">
-                            Page {mp.page_number}:
-                          </Typography>
-                          {Object.entries(mp.highlight).map(
-                            ([field, highlights]) => (
-                              <Box key={field}>
-                                {highlights.map((hl, index) => (
-                                  <Highlighter
-                                    key={index}
-                                    searchWords={[
-                                      ...(result.matched_terms.exact || []),
-                                      ...(result.matched_terms.fuzzy || []),
-                                    ]}
-                                    autoEscape={true}
-                                    textToHighlight={hl.replace(
-                                      /<em>(.*?)<\/em>/g,
-                                      "$1"
-                                    )}
-                                    highlightTag={({ children }) => {
-                                      const isExact = (
-                                        result.matched_terms.exact || []
-                                      ).some(
-                                        (term) =>
-                                          term.toLowerCase() ===
-                                          children.toLowerCase()
-                                      );
-                                      return (
-                                        <span
-                                          style={{
-                                            backgroundColor: isExact
-                                              ? "#ffeb3b"
-                                              : "#ff9800",
-                                          }}
-                                        >
-                                          {children}
-                                        </span>
-                                      );
-                                    }}
-                                  />
-                                ))}
-                              </Box>
-                            )
-                          )}
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "flex-end",
-                              mt: 1,
-                            }}
-                          >
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              onClick={() =>
-                                setSelectedDocument({
-                                  document: result,
-                                  initialPage: mp.page_number,
-                                })
-                              }
+                      result.matched_pages
+                        .sort((a, b) => a.page_number - b.page_number)
+                        .map((mp) => (
+                          <Box key={mp.page_number} sx={{ ml: 2, mb: 1 }}>
+                            <Typography variant="body2">
+                              Page {mp.page_number}:
+                            </Typography>
+                            {Object.entries(mp.highlight).map(
+                              ([field, highlights]) => (
+                                <Box key={field}>
+                                  {highlights.map((hl, index) => (
+                                    <Highlighter
+                                      key={index}
+                                      searchWords={[
+                                        ...(result.matched_terms.exact || []),
+                                        ...(result.matched_terms.fuzzy || []),
+                                      ]}
+                                      autoEscape={true}
+                                      textToHighlight={hl.replace(
+                                        /<em>(.*?)<\/em>/g,
+                                        "$1"
+                                      )}
+                                      highlightTag={({ children }) => {
+                                        const isExact = (
+                                          result.matched_terms.exact || []
+                                        ).some(
+                                          (term) =>
+                                            term.toLowerCase() ===
+                                            children.toLowerCase()
+                                        );
+                                        return (
+                                          <span
+                                            style={{
+                                              backgroundColor: isExact
+                                                ? "#ffeb3b"
+                                                : "#ff9800",
+                                            }}
+                                          >
+                                            {children}
+                                          </span>
+                                        );
+                                      }}
+                                    />
+                                  ))}
+                                </Box>
+                              )
+                            )}
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                mt: 1,
+                              }}
                             >
-                              ดูเพิ่มเติม
-                            </Button>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() =>
+                                  setSelectedDocument({
+                                    document: result,
+                                    initialPage: mp.page_number,
+                                  })
+                                }
+                              >
+                                ดูเพิ่มเติม
+                              </Button>
+                            </Box>
+                            <Divider sx={{ mt: 2 }} />
                           </Box>
-                          <Divider sx={{ mt: 2 }} />
-                        </Box>
-                      ))
+                        ))
                     ) : (
                       <Typography variant="body2">
                         No matched pages found
