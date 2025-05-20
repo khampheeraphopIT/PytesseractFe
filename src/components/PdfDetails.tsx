@@ -24,12 +24,11 @@ const PDFDetail: React.FC<PDFDetailProps> = ({ document, initialPage }) => {
         ค้นหาคำว่า: {document.query}
       </Typography>
 
-      <Box display="flex" sx={{ height: "80vh" }}>
+      <Box display="flex" justifyContent='space-between'>
         <Box
           sx={{
             width: "200px",
-            borderRight: 1,
-            borderColor: "divider",
+            borderRight: "1px solid #ccc",
             overflowY: "auto",
           }}
         >
