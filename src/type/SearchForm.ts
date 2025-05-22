@@ -2,6 +2,7 @@ export interface IMatchedPage {
   page_number: number;
   highlight: Record<string, string[]>;
   exact_match_counts: Record<string, number>;
+  keywords: string[];
 }
 
 export interface ISearchForm {

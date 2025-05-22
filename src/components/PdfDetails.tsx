@@ -26,6 +26,7 @@ const PDFDetail: React.FC<PDFDetailProps> = ({ document, initialPage }) => {
   const [error, setError] = useState<string | null>(null);
   const [selectedPage, setSelectedPage] = useState<number>(initialPage);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
+  const [isExactSelected, setIsExactSelected] = useState<boolean>(false);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const exportPDF = async (docId: string, fileName: string) => {
@@ -56,12 +57,20 @@ const PDFDetail: React.FC<PDFDetailProps> = ({ document, initialPage }) => {
   };
 
   const scrollToPage = (pageNumber: number) => {
+    if (pageNumber !== selectedPage) {
+      setSelectedTerm(null);
+      setIsExactSelected(false);
+    }
     setSelectedPage(pageNumber);
   };
 
-  // เมื่อคลิก Chip ให้เลือกคำนั้นและเลื่อนไปยังหน้าที่เกี่ยวข้อง
-  const handleTermClick = (term: string, pageNumber: number) => {
+  const handleTermClick = (
+    term: string,
+    pageNumber: number,
+    isExact: boolean
+  ) => {
     setSelectedTerm(term);
+    setIsExactSelected(isExact);
     setSelectedPage(pageNumber);
   };
 
@@ -78,6 +87,8 @@ const PDFDetail: React.FC<PDFDetailProps> = ({ document, initialPage }) => {
 
   useEffect(() => {
     setSelectedPage(initialPage);
+    setSelectedTerm(null);
+    setIsExactSelected(false);
   }, [initialPage]);
 
   return (
@@ -97,58 +108,124 @@ const PDFDetail: React.FC<PDFDetailProps> = ({ document, initialPage }) => {
       <Box display="flex" justifyContent="space-between">
         <Box
           sx={{
-            width: "150px", // เพิ่มความกว้างเพื่อรองรับ Chip
+            width: "200px",
             flexShrink: 0,
           }}
         >
           <List>
             {document.matched_pages
               .sort((a, b) => a.page_number - b.page_number)
-              .map((page) => (
-                <ListItem key={page.page_number} disablePadding>
-                  <ListItemButton
-                    onClick={() => scrollToPage(page.page_number)}
-                    sx={{
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <Stack direction="column" spacing={0.5}>
-                      <Typography variant="subtitle1">
-                        Page {page.page_number}
-                      </Typography>
-                      <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                        {Object.entries(page.exact_match_counts).length > 0 ? (
-                          Object.entries(page.exact_match_counts).map(
-                            ([term, count], index) => (
-                              <Chip
-                                key={index}
-                                label={`${term}: ${count}`}
-                                size="small"
-                                sx={{
-                                  backgroundColor:
-                                    selectedTerm === term &&
-                                    selectedPage === page.page_number
-                                      ? "#ffd700" // สีเมื่อเลือก
-                                      : "#ffeb3b",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() =>
-                                  handleTermClick(term, page.page_number)
-                                }
-                              />
+              .map((page) => {
+                const pageKeywords = (page.keywords || []).filter(
+                  (keyword) =>
+                    page.highlight["pages.normalized_text"]?.some((hl) =>
+                      hl.toLowerCase().includes(keyword.toLowerCase())
+                    ) ||
+                    page.highlight["pages.keywords"]?.some((hl) =>
+                      hl.toLowerCase().includes(keyword.toLowerCase())
+                    )
+                );
+                const limitedKeywords = pageKeywords.slice(0, 3);
+                const hasMoreKeywords = pageKeywords.length > 3;
+
+                return (
+                  <ListItem key={page.page_number} disablePadding>
+                    <ListItemButton
+                      onClick={() => scrollToPage(page.page_number)}
+                      sx={{
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Stack direction="column" spacing={0.5}>
+                        <Typography variant="subtitle1">
+                          Page {page.page_number}
+                        </Typography>
+                        <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                          {Object.entries(page.exact_match_counts).length >
+                          0 ? (
+                            Object.entries(page.exact_match_counts).map(
+                              ([term, count], index) => (
+                                <Chip
+                                  key={`exact-${index}`}
+                                  label={`${term}: ${count}`}
+                                  size="small"
+                                  sx={{
+                                    backgroundColor: "#ffeb3b", // สีเหลืองสำหรับ exact
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() =>
+                                    handleTermClick(
+                                      term,
+                                      page.page_number,
+                                      true
+                                    )
+                                  }
+                                />
+                              )
                             )
-                          )
-                        ) : (
-                          <Typography variant="caption" color="text.secondary">
-                            0
-                          </Typography>
-                        )}
+                          ) : (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              No exact matches
+                            </Typography>
+                          )}
+                        </Stack>
+                        {/* Page Keywords */}
+                        <Stack
+                          direction="row"
+                          spacing={0.5}
+                          alignItems="center"
+                        >
+                          {limitedKeywords.length > 0 ? (
+                            <>
+                              {limitedKeywords.map((keyword, index) => (
+                                <Typography
+                                  key={`keyword-${index}`}
+                                  variant="caption"
+                                  sx={{
+                                    color:
+                                      selectedTerm === keyword &&
+                                      selectedPage === page.page_number &&
+                                      !isExactSelected
+                                        ? "#ff9800" // สีส้มเมื่อเลือก
+                                        : "#000",
+                                    cursor: "pointer",
+                                    "&:hover": {
+                                      textDecoration: "underline",
+                                    },
+                                  }}
+                                  onClick={() =>
+                                    handleTermClick(
+                                      keyword,
+                                      page.page_number,
+                                      false
+                                    )
+                                  }
+                                >
+                                  {keyword}
+                                </Typography>
+                              ))}
+                              {hasMoreKeywords && (
+                                <Typography variant="caption">...</Typography>
+                              )}
+                            </>
+                          ) : (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              No keywords
+                            </Typography>
+                          )}
+                        </Stack>
                       </Stack>
-                    </Stack>
-                  </ListItemButton>
-                </ListItem>
-              ))}
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
           </List>
         </Box>
 
@@ -199,18 +276,29 @@ const PDFDetail: React.FC<PDFDetailProps> = ({ document, initialPage }) => {
                         autoEscape={true}
                         textToHighlight={hl.replace(/<em>(.*?)<\/em>/g, "$1")}
                         highlightTag={({ children }) => {
-                          const isExact =
-                            selectedTerm && selectedPage === page.page_number
-                              ? children.toLowerCase() ===
-                                selectedTerm.toLowerCase()
-                              : (document.matched_terms.exact || []).some(
-                                  (term) =>
-                                    term.toLowerCase() === children.toLowerCase()
-                                );
+                          const isExact = (
+                            document.matched_terms.exact || []
+                          ).some(
+                            (term) =>
+                              term.toLowerCase() === children.toLowerCase()
+                          );
                           return (
                             <span
                               style={{
-                                backgroundColor: isExact ? "#ffeb3b" : "#ff9800",
+                                backgroundColor:
+                                  selectedTerm &&
+                                  selectedPage === page.page_number &&
+                                  isExactSelected &&
+                                  !isExact
+                                    ? "transparent" // ซ่อน keywords เมื่อเลือก exact
+                                    : selectedTerm &&
+                                      selectedPage === page.page_number &&
+                                      !isExactSelected &&
+                                      isExact
+                                    ? "transparent" // ซ่อน exact เมื่อเลือก keyword
+                                    : isExact
+                                    ? "#ffeb3b" // สีเหลืองสำหรับ exact
+                                    : "#ff9800", // สีส้มสำหรับ keywords
                               }}
                             >
                               {children}
