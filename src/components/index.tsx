@@ -14,6 +14,23 @@ const Index: React.FC = () => {
     initialPage: number;
   } | null>(null);
 
+  const truncateText = (
+    text: string,
+    maxLines: number = 5,
+    charsPerLine: number = 100
+  ) => {
+    const maxLength = maxLines * charsPerLine; // ประมาณ 100 ตัวอักษรต่อบรรทัด
+    if (text.length <= maxLength) return text;
+
+    // หาคำสุดท้ายใน maxLength
+    let truncated = text.slice(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(" ");
+    if (lastSpace > 0) {
+      truncated = truncated.slice(0, lastSpace); // ตัดที่ช่องว่างสุดท้าย
+    }
+    return `${truncated}...`;
+  };
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       {!selectedDocument ? (
@@ -80,7 +97,8 @@ const Index: React.FC = () => {
                       Keywords:
                     </Typography>
                     <Typography variant="body2">
-                      {result.all_keywords.join(", ") || "No keywords found"}
+                      {(result.all_keywords || []).slice(0, 50).join(", ") ||
+                        "No keywords found"}
                     </Typography>
                   </Box>
                   <Box sx={{ mt: 1 }}>
@@ -106,9 +124,10 @@ const Index: React.FC = () => {
                                         ...(result.matched_terms.fuzzy || []),
                                       ]}
                                       autoEscape={true}
-                                      textToHighlight={hl.replace(
-                                        /<em>(.*?)<\/em>/g,
-                                        "$1"
+                                      textToHighlight={truncateText(
+                                        hl.replace(/<em>(.*?)<\/em>/g, "$1"),
+                                        5, // จำกัด 5 บรรทัด
+                                        100 // ประมาณ 100 ตัวอักษรต่อบรรทัด
                                       )}
                                       highlightTag={({ children }) => {
                                         const isExact = (

@@ -1,3 +1,9 @@
+export interface IMatchedPage {
+  page_number: number;
+  highlight: Record<string, string[]>;
+  exact_match_counts: Record<string, number>;
+}
+
 export interface ISearchForm {
   id: string;
   title: string;
@@ -9,11 +15,7 @@ export interface ISearchForm {
   };
   highlight: Record<string, string[]>;
   all_keywords: string[];
-  matched_pages: {
-    page_number: number;
-    original_text: string;
-    highlight: Record<string, string[]>;
-  }[];
+  matched_pages: IMatchedPage[];
 }
 
 export interface SearchRequest {
