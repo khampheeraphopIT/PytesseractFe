@@ -5,6 +5,7 @@ import UploadForm from "./UploadForm";
 import PDFDetail from "../components/PdfDetails";
 import type { ISearchForm } from "../type/SearchForm";
 import Highlighter from "react-highlight-words";
+import truncateText from "../utils/truncate";
 
 const Index: React.FC = () => {
   const [searchForms, setSearchForms] = useState<ISearchForm[]>([]);
@@ -13,23 +14,6 @@ const Index: React.FC = () => {
     document: ISearchForm;
     initialPage: number;
   } | null>(null);
-
-  const truncateText = (
-    text: string,
-    maxLines: number = 5,
-    charsPerLine: number = 100
-  ) => {
-    const maxLength = maxLines * charsPerLine; // ประมาณ 100 ตัวอักษรต่อบรรทัด
-    if (text.length <= maxLength) return text;
-
-    // หาคำสุดท้ายใน maxLength
-    let truncated = text.slice(0, maxLength);
-    const lastSpace = truncated.lastIndexOf(" ");
-    if (lastSpace > 0) {
-      truncated = truncated.slice(0, lastSpace); // ตัดที่ช่องว่างสุดท้าย
-    }
-    return `${truncated}...`;
-  };
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -126,8 +110,8 @@ const Index: React.FC = () => {
                                       autoEscape={true}
                                       textToHighlight={truncateText(
                                         hl.replace(/<em>(.*?)<\/em>/g, "$1"),
-                                        5, // จำกัด 5 บรรทัด
-                                        100 // ประมาณ 100 ตัวอักษรต่อบรรทัด
+                                        5, 
+                                        100 
                                       )}
                                       highlightTag={({ children }) => {
                                         const isExact = (
