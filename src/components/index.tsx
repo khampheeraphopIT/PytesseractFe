@@ -5,6 +5,7 @@ import UploadForm from "./UploadForm";
 import PDFDetail from "../components/PdfDetails";
 import type { ISearchForm } from "../type/SearchForm";
 import Highlighter from "react-highlight-words";
+import { highlightText } from "../utils/highlightText";
 import truncateText from "../utils/truncate";
 
 const Index: React.FC = () => {
@@ -100,41 +101,36 @@ const Index: React.FC = () => {
                             {Object.entries(mp.highlight).map(
                               ([field, highlights]) => (
                                 <Box key={field}>
-                                  {highlights.map((hl, index) => (
-                                    <Highlighter
-                                      key={index}
-                                      searchWords={[
-                                        ...(result.matched_terms.exact || []),
-                                        ...(result.matched_terms.fuzzy || []),
-                                      ]}
-                                      autoEscape={true}
-                                      textToHighlight={truncateText(
-                                        hl.replace(/<em>(.*?)<\/em>/g, "$1"),
-                                        5, 
-                                        100 
-                                      )}
-                                      highlightTag={({ children }) => {
-                                        const isExact = (
-                                          result.matched_terms.exact || []
-                                        ).some(
-                                          (term) =>
-                                            term.toLowerCase() ===
-                                            children.toLowerCase()
-                                        );
-                                        return (
-                                          <span
-                                            style={{
-                                              backgroundColor: isExact
-                                                ? "#ffeb3b"
-                                                : "#ffe0b2",
-                                            }}
-                                          >
-                                            {children}
-                                          </span>
-                                        );
-                                      }}
-                                    />
-                                  ))}
+                                  {highlights.map((hl, index) => {
+                                    const highlightProps = highlightText({
+                                      text: truncateText(hl, 5, 100),
+                                      exactWords:
+                                        result.matched_terms.exact || [],
+                                      fuzzyWords:
+                                        result.matched_terms.fuzzy || [],
+                                    });
+                                    return (
+                                      <Highlighter
+                                        key={index}
+                                        searchWords={highlightProps.searchWords}
+                                        autoEscape={highlightProps.autoEscape}
+                                        textToHighlight={
+                                          highlightProps.textToHighlight
+                                        }
+                                        highlightTag={({ children }) => {
+                                          const { style } =
+                                            highlightProps.highlightTag({
+                                              children,
+                                            });
+                                          return (
+                                            <span style={style}>
+                                              {children}
+                                            </span>
+                                          );
+                                        }}
+                                      />
+                                    );
+                                  })}
                                 </Box>
                               )
                             )}

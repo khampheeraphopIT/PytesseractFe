@@ -1,5 +1,6 @@
 import { Paper, Typography, Box } from "@mui/material";
 import Highlighter from "react-highlight-words";
+import { highlightText } from "../../utils/highlightText";
 import type { IMatchedPage } from "../../type/SearchForm";
 
 interface PageContentListProps {
@@ -45,46 +46,31 @@ const PageContentList: React.FC<PageContentListProps> = ({
           </Typography>
           {Object.entries(page.highlight).map(([field, highlights]) => (
             <Box key={field}>
-              {highlights.map((hl, idx) => (
-                <Highlighter
-                  key={idx}
-                  searchWords={
-                    selectedTerm && selectedPage === page.page_number
-                      ? [selectedTerm]
-                      : [
-                          ...(matchedTerms.exact || []),
-                          ...(matchedTerms.fuzzy || []),
-                        ]
-                  }
-                  autoEscape
-                  textToHighlight={hl.replace(/<em>(.*?)<\/em>/g, "$1")}
-                  highlightTag={({ children }) => {
-                    // ตรวจสอบว่า children เป็นส่วนหนึ่งของ exact match
-                    const isExact = (matchedTerms.exact || []).some(
-                      (term) =>
-                        term.toLowerCase().includes(children.toLowerCase()) ||
-                        children.toLowerCase().includes(term.toLowerCase())
-                    );
-                    return (
-                      <span
-                        style={{
-                          backgroundColor:
-                            selectedTerm &&
-                            selectedPage === page.page_number &&
-                            ((isExactSelected && !isExact) ||
-                              (!isExactSelected && isExact))
-                              ? "transparent"
-                              : isExact
-                              ? "#ffeb3b"
-                              : "#ffe0b2",
-                        }}
-                      >
-                        {children}
-                      </span>
-                    );
-                  }}
-                />
-              ))}
+              {highlights.map((hl, idx) => {
+                const highlightProps = highlightText({
+                  text: hl,
+                  exactWords: matchedTerms.exact || [],
+                  fuzzyWords: matchedTerms.fuzzy || [],
+                  isExactSelected,
+                  selectedTerm,
+                  selectedPage,
+                  currentPage: page.page_number,
+                });
+                return (
+                  <Highlighter
+                    key={idx}
+                    searchWords={highlightProps.searchWords}
+                    autoEscape={highlightProps.autoEscape}
+                    textToHighlight={highlightProps.textToHighlight}
+                    highlightTag={({ children }) => {
+                      const { style } = highlightProps.highlightTag({
+                        children,
+                      });
+                      return <span style={style}>{children}</span>;
+                    }}
+                  />
+                );
+              })}
             </Box>
           ))}
         </Paper>
