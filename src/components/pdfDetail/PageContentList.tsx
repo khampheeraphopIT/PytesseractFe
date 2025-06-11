@@ -33,7 +33,7 @@ const PageContentList: React.FC<PageContentListProps> = ({
             pageRefs.current[index] = el;
           }}
           sx={{
-            width: "794px",
+            maxWidth: "100%",
             minHeight: "1123px",
             p: 3,
             mb: 2,
@@ -59,24 +59,24 @@ const PageContentList: React.FC<PageContentListProps> = ({
                   autoEscape
                   textToHighlight={hl.replace(/<em>(.*?)<\/em>/g, "$1")}
                   highlightTag={({ children }) => {
+                    // ตรวจสอบว่า children เป็นส่วนหนึ่งของ exact match
                     const isExact = (matchedTerms.exact || []).some(
-                      (term) => term.toLowerCase() === children.toLowerCase()
+                      (term) =>
+                        term.toLowerCase().includes(children.toLowerCase()) ||
+                        children.toLowerCase().includes(term.toLowerCase())
                     );
                     return (
                       <span
                         style={{
                           backgroundColor:
-                            selectedTerm && selectedPage === page.page_number
-                              ? isExactSelected && !isExact
-                                ? "transparent"
-                                : !isExactSelected && isExact
-                                ? "transparent"
-                                : isExact
-                                ? "#ffeb3b"
-                                : "#ff9800"
+                            selectedTerm &&
+                            selectedPage === page.page_number &&
+                            ((isExactSelected && !isExact) ||
+                              (!isExactSelected && isExact))
+                              ? "transparent"
                               : isExact
                               ? "#ffeb3b"
-                              : "#ff9800",
+                              : "#ffe0b2",
                         }}
                       >
                         {children}

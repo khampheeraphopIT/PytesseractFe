@@ -16,7 +16,7 @@ const Index: React.FC = () => {
   } | null>(null);
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       {!selectedDocument ? (
         <>
           <Typography variant="h4" gutterBottom align="center">
@@ -126,7 +126,7 @@ const Index: React.FC = () => {
                                             style={{
                                               backgroundColor: isExact
                                                 ? "#ffeb3b"
-                                                : "#ff9800",
+                                                : "#ffe0b2",
                                             }}
                                           >
                                             {children}

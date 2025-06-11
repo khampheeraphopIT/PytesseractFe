@@ -69,13 +69,13 @@ const PDFDetail: React.FC<PDFDetailProps> = ({ document, initialPage }) => {
   }, [selectedPage, document.matched_pages]);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container  maxWidth="lg" >
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Typography variant="h6">ค้นหาคำว่า: {document.query}</Typography>
         <Button
           variant="contained"
           onClick={() =>
-            downloadPDF(document.id, document.title || "document.pdf")
+            downloadPDF(document.id, document.title)
           }
         >
           ดาวน์โหลด PDF
@@ -87,7 +87,7 @@ const PDFDetail: React.FC<PDFDetailProps> = ({ document, initialPage }) => {
         </Alert>
       )}
       <Box sx={{ display: "flex", gap: 2 }}>
-        <Box sx={{ width: 200, flexShrink: 0 }}>
+        <Box sx={{ width: 200 }}>
           <PageList
             matchedPages={document.matched_pages}
             selectedPage={selectedPage}
@@ -98,7 +98,7 @@ const PDFDetail: React.FC<PDFDetailProps> = ({ document, initialPage }) => {
           />
         </Box>
         <Box
-          sx={{ flex: 1, overflowY: "auto", maxHeight: "80vh", minWidth: 800 }}
+          sx={{ flex: 1, overflowY: "auto", maxHeight: "100vh" }}
         >
           <PageContentList
             matchedPages={document.matched_pages}
